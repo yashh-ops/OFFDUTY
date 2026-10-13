@@ -42,15 +42,34 @@ app.use(errorHandler);
 
 const PORT = process.env.PORT || 5000;
 
-connectDB()
-  .then(() => {
-    app.listen(PORT, () =>
-      console.log(`API listening on http://localhost:${PORT}`),
-    );
-  })
-  .catch((err) => {
-    console.error("Failed to connect to MongoDB:", err.message);
-    process.exit(1);
-  });
+// Reuse the same MongoDB connection promise.
+const dbPromise = connectDB();
 
+// On Vercel, wait for MongoDB before processing requests.
+if (process.env.VERCEL) {
+  app.use(async (req, res, next) => {
+    try {
+      await dbPromise;
+      next();
+    } catch (error) {
+      next(error);
+    }
+  });
+}
+
+// Start the HTTP server only when running locally.
+if (!process.env.VERCEL) {
+  dbPromise
+    .then(() => {
+      app.listen(PORT, () => {
+        console.log(`OFFDUTY API running on http://localhost:${PORT}`);
+      });
+    })
+    .catch((err) => {
+      console.error("Failed to connect to MongoDB:", err.message);
+      process.exit(1);
+    });
+}
+
+// Export Express app for Vercel.
 export default app;
