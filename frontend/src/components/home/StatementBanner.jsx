@@ -1,2 +1,23 @@
-import { Link } from 'react-router-dom'
-export default function StatementBanner(){return <section className="relative flex min-h-[380px] flex-col items-center justify-center overflow-hidden bg-[#20221e] px-5 py-20 text-center text-white sm:min-h-[500px]"><p className="text-xs font-bold uppercase tracking-[.3em] text-white/70">The philosophy</p><h2 className="mt-5 max-w-4xl text-[clamp(2.5rem,7vw,6rem)] font-black uppercase leading-[.95] tracking-tight">Made for your own lane.</h2><p className="mt-6 max-w-lg text-sm leading-7 text-white/75">No dress code. No compromise. Everyday essentials designed around how you actually move.</p><Link to="/shop?sort=newest" className="mt-8 border-b border-white pb-2 text-xs font-bold uppercase tracking-widest">Explore new arrivals ↗</Link></section>}
+import { Link } from "react-router-dom";
+export default function StatementBanner() {
+  return (
+    <section className="relative flex min-h-[380px] flex-col items-center justify-center overflow-hidden bg-[#20221e] px-5 py-20 text-center text-white sm:min-h-[500px]">
+      <p className="text-xs font-bold uppercase tracking-[.3em] text-white/70">
+        The philosophy
+      </p>
+      <h2 className="mt-5 max-w-4xl text-[clamp(2.5rem,7vw,6rem)] font-black uppercase leading-[.95] tracking-tight">
+        Made for your own lane.
+      </h2>
+      <p className="mt-6 max-w-lg text-sm leading-7 text-white/75">
+        No dress code. No compromise. Everyday essentials designed around how
+        you actually move.
+      </p>
+      <Link
+        to="/shop?sort=newest"
+        className="mt-8 border-b border-white pb-2 text-xs font-bold uppercase tracking-widest"
+      >
+        Explore new arrivals ↗
+      </Link>
+    </section>
+  );
+}

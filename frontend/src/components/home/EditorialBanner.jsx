@@ -1,3 +1,42 @@
-import { Link } from 'react-router-dom'
-import editorialImage from '../../assets/carsouselimg5.jpg'
-export default function EditorialBanner(){return <section className="mx-auto grid max-w-7xl gap-3 px-4 py-8 sm:grid-cols-2 sm:px-6 lg:px-8"><Link to="/shop?sort=newest" className="group relative aspect-[4/3] overflow-hidden bg-neutral-900 sm:aspect-[4/5]"><img src={editorialImage} alt="OFFDUTY collection artwork" loading="lazy" className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"/><span className="absolute bottom-6 left-6 text-2xl font-black uppercase text-white sm:text-4xl">The new drop ↗</span></Link><div className="flex flex-col justify-center bg-[#eae7df] p-8 sm:p-12"><p className="text-xs font-bold uppercase tracking-[.3em]">The OFFDUTY edit</p><h2 className="mt-6 text-4xl font-black uppercase leading-tight sm:text-6xl">Less rules.<br/>More you.</h2><p className="mt-5 max-w-sm text-sm leading-7">Everyday silhouettes, oversized comfort, and pieces made to be worn your way.</p><Link className="mt-8 w-fit border-b border-black pb-2 text-xs font-bold uppercase tracking-widest" to="/shop">Explore the collection ↗</Link></div></section>}
+import { Link } from "react-router-dom";
+import editorialImage from "../../assets/carsouselimg5.jpg";
+export default function EditorialBanner() {
+  return (
+    <section className="mx-auto grid max-w-7xl gap-3 px-4 py-8 sm:grid-cols-2 sm:px-6 lg:px-8">
+      <Link
+        to="/shop?sort=newest"
+        className="group relative aspect-[4/3] overflow-hidden bg-neutral-900 sm:aspect-[4/5]"
+      >
+        <img
+          src={editorialImage}
+          alt="OFFDUTY collection artwork"
+          loading="lazy"
+          className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+        />
+        <span className="absolute bottom-6 left-6 text-2xl font-black uppercase text-white sm:text-4xl">
+          The new drop ↗
+        </span>
+      </Link>
+      <div className="flex flex-col justify-center bg-[#eae7df] p-8 sm:p-12">
+        <p className="text-xs font-bold uppercase tracking-[.3em]">
+          The OFFDUTY edit
+        </p>
+        <h2 className="mt-6 text-4xl font-black uppercase leading-tight sm:text-6xl">
+          Less rules.
+          <br />
+          More you.
+        </h2>
+        <p className="mt-5 max-w-sm text-sm leading-7">
+          Everyday silhouettes, oversized comfort, and pieces made to be worn
+          your way.
+        </p>
+        <Link
+          className="mt-8 w-fit border-b border-black pb-2 text-xs font-bold uppercase tracking-widest"
+          to="/shop"
+        >
+          Explore the collection ↗
+        </Link>
+      </div>
+    </section>
+  );
+}
