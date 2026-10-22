@@ -1,79 +1,87 @@
-import { useEffect, useRef, useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
-import { Search, X, Loader2 } from 'lucide-react'
-import { searchProducts } from '../../services/productService'
-import trendingJackets from '../../assets/10048.jpg'
-import trendingTrench from '../../assets/10055.jpg'
-import trendingCoats from '../../assets/10044.jpg'
-import trendingTrousers from '../../assets/10030.png'
-import trendingBlazers from '../../assets/10053.jpg'
-import trendingJeans from '../../assets/10031.png'
+import { useEffect, useRef, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { Search, X, Loader2 } from "lucide-react";
+import { searchProducts } from "../../services/productService";
+import trendingJackets from "../../assets/10048.jpg";
+import trendingTrench from "../../assets/10055.jpg";
+import trendingCoats from "../../assets/10044.jpg";
+import trendingTrousers from "../../assets/10030.jpg";
+import trendingBlazers from "../../assets/10053.jpg";
+import trendingJeans from "../../assets/10031.jpg";
 
 const TRENDING = [
-  { label: 'Jackets', to: '/shop?category=jackets', image: trendingJackets },
-  { label: 'Trench Coats', to: '/shop?category=trench-coats', image: trendingTrench },
-  { label: 'Coats', to: '/shop?category=coats', image: trendingCoats },
-  { label: 'Trousers', to: '/shop?category=trousers', image: trendingTrousers },
-  { label: 'Blazers', to: '/shop?category=blazers', image: trendingBlazers },
-  { label: 'Jeans', to: '/shop?category=jeans', image: trendingJeans },
-]
+  { label: "Jackets", to: "/shop?category=jackets", image: trendingJackets },
+  {
+    label: "Trench Coats",
+    to: "/shop?category=trench-coats",
+    image: trendingTrench,
+  },
+  { label: "Coats", to: "/shop?category=coats", image: trendingCoats },
+  { label: "Trousers", to: "/shop?category=trousers", image: trendingTrousers },
+  { label: "Blazers", to: "/shop?category=blazers", image: trendingBlazers },
+  { label: "Jeans", to: "/shop?category=jeans", image: trendingJeans },
+];
 
 const GENDER_TABS = [
-  { value: 'all', label: 'All' },
-  { value: 'women', label: 'Women' },
-  { value: 'men', label: 'Men' },
-]
+  { value: "all", label: "All" },
+  { value: "women", label: "Women" },
+  { value: "men", label: "Men" },
+];
 
 export default function SearchOverlay({ open, onClose }) {
-  const [query, setQuery] = useState('')
-  const [gender, setGender] = useState('all')
-  const [results, setResults] = useState([])
-  const [loading, setLoading] = useState(false)
-  const inputRef = useRef(null)
-  const navigate = useNavigate()
+  const [query, setQuery] = useState("");
+  const [gender, setGender] = useState("all");
+  const [results, setResults] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const inputRef = useRef(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
-    if (!open) return
-    setQuery('')
-    setResults([])
-    setGender('all')
-    setTimeout(() => inputRef.current?.focus(), 50)
-    document.body.style.overflow = 'hidden'
-    const onKey = (e) => e.key === 'Escape' && onClose()
-    window.addEventListener('keydown', onKey)
+    if (!open) return;
+    setQuery("");
+    setResults([]);
+    setGender("all");
+    setTimeout(() => inputRef.current?.focus(), 50);
+    document.body.style.overflow = "hidden";
+    const onKey = (e) => e.key === "Escape" && onClose();
+    window.addEventListener("keydown", onKey);
     return () => {
-      document.body.style.overflow = ''
-      window.removeEventListener('keydown', onKey)
-    }
-  }, [open, onClose])
+      document.body.style.overflow = "";
+      window.removeEventListener("keydown", onKey);
+    };
+  }, [open, onClose]);
 
   useEffect(() => {
     if (!query.trim()) {
-      setResults([])
-      setLoading(false)
-      return
+      setResults([]);
+      setLoading(false);
+      return;
     }
-    setLoading(true)
+    setLoading(true);
     const handle = setTimeout(() => {
       searchProducts(query, gender).then((res) => {
-        setResults(res)
-        setLoading(false)
-      })
-    }, 200)
-    return () => clearTimeout(handle)
-  }, [query, gender])
+        setResults(res);
+        setLoading(false);
+      });
+    }, 200);
+    return () => clearTimeout(handle);
+  }, [query, gender]);
 
-  if (!open) return null
+  if (!open) return null;
 
   function goTo(to) {
-    onClose()
-    navigate(to)
+    onClose();
+    navigate(to);
   }
 
   return (
     <div className="fixed inset-0 z-50 flex flex-col overflow-y-auto bg-white/40 backdrop-blur-2xl backdrop-saturate-150 supports-backdrop-filter:bg-white/20">
       <div className="flex items-center justify-between gap-4 border-b border-white/40 px-4 py-4 sm:px-6 lg:px-8">
-        <Link to="/" onClick={onClose} className="text-lg font-bold tracking-[0.2em]">
+        <Link
+          to="/"
+          onClick={onClose}
+          className="text-lg font-bold tracking-[0.2em]"
+        >
           OFFDUTY
         </Link>
         <button
@@ -95,7 +103,12 @@ export default function SearchOverlay({ open, onClose }) {
             placeholder="What are you looking for?"
             className="flex-1 bg-transparent text-base outline-none placeholder:text-neutral-500"
           />
-          {loading && <Loader2 size={18} className="shrink-0 animate-spin text-neutral-400" />}
+          {loading && (
+            <Loader2
+              size={18}
+              className="shrink-0 animate-spin text-neutral-400"
+            />
+          )}
         </div>
 
         <div className="mt-4 flex items-center justify-center gap-2">
@@ -105,8 +118,8 @@ export default function SearchOverlay({ open, onClose }) {
               onClick={() => setGender(tab.value)}
               className={`rounded-full px-4 py-1.5 text-xs font-bold uppercase tracking-wide backdrop-blur-md transition-colors ${
                 gender === tab.value
-                  ? 'bg-neutral-900 text-white'
-                  : 'bg-white/30 text-neutral-600 hover:bg-white/50 hover:text-neutral-900'
+                  ? "bg-neutral-900 text-white"
+                  : "bg-white/30 text-neutral-600 hover:bg-white/50 hover:text-neutral-900"
               }`}
             >
               {tab.label}
@@ -123,7 +136,9 @@ export default function SearchOverlay({ open, onClose }) {
               {TRENDING.map((t) => (
                 <button
                   key={t.label}
-                  onClick={() => goTo(gender !== 'all' ? `${t.to}&gender=${gender}` : t.to)}
+                  onClick={() =>
+                    goTo(gender !== "all" ? `${t.to}&gender=${gender}` : t.to)
+                  }
                   className="group w-32 shrink-0 text-left sm:w-36"
                 >
                   <div className="aspect-[3/4] overflow-hidden rounded-lg bg-neutral-200">
@@ -133,7 +148,9 @@ export default function SearchOverlay({ open, onClose }) {
                       className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
                     />
                   </div>
-                  <p className="mt-2 text-sm font-medium text-neutral-800">{t.label}</p>
+                  <p className="mt-2 text-sm font-medium text-neutral-800">
+                    {t.label}
+                  </p>
                 </button>
               ))}
             </div>
@@ -148,7 +165,11 @@ export default function SearchOverlay({ open, onClose }) {
                   onClick={() => goTo(`/product/${product.slug}`)}
                   className="flex w-full items-center gap-4 px-5 py-3 text-left hover:bg-white/40"
                 >
-                  <img src={product.images[0]} alt="" className="h-14 w-11 rounded object-cover" />
+                  <img
+                    src={product.images[0]}
+                    alt=""
+                    className="h-14 w-11 rounded object-cover"
+                  />
                   <div>
                     <p className="text-sm font-medium">{product.name}</p>
                     <p className="text-xs text-neutral-500">₹{product.price}</p>
@@ -160,9 +181,11 @@ export default function SearchOverlay({ open, onClose }) {
         )}
 
         {query.trim() && !loading && results.length === 0 && (
-          <p className="py-8 text-center text-sm text-neutral-500">No products found for "{query}"</p>
+          <p className="py-8 text-center text-sm text-neutral-500">
+            No products found for "{query}"
+          </p>
         )}
       </div>
     </div>
-  )
+  );
 }
