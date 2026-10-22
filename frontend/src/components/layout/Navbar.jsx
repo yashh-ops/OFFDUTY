@@ -1,128 +1,237 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
-import { Heart, Menu, Search, ShoppingBag, User } from "lucide-react";
+import { Link, useLocation } from "react-router-dom";
+import { Heart, Menu, Search, ShoppingBag, UserRound, X } from "lucide-react";
+
 import { useAuth } from "../../context/AuthContext";
 import { useCart } from "../../context/CartContext";
 import { useWishlist } from "../../context/WishlistContext";
+
 import MobileNav from "./MobileNav";
 import ShopMegaMenu from "./ShopMegaMenu";
 import SearchOverlay from "./SearchOverlay";
 
+const announcements = [
+  "FREE SHIPPING ON ORDERS ABOVE ₹1,499",
+  "DROP 001 — EXPLORE THE COLLECTION",
+  "NEW SEASON. SAME ATTITUDE.",
+];
+
 export default function Navbar() {
   const { user } = useAuth();
+  const { itemCount, setCartOpen } = useCart();
+  const { count: wishlistCount } = useWishlist();
+  const location = useLocation();
+
   const [scrolled, setScrolled] = useState(false);
   const [shopMenuOpen, setShopMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
-  const { itemCount, setCartOpen } = useCart();
+  const [announcementIndex, setAnnouncementIndex] = useState(0);
 
-  const { count: wishlistCount } = useWishlist();
-
+  // Sticky header shadow
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 8);
-    window.addEventListener("scroll", onScroll);
-    return () => window.removeEventListener("scroll", onScroll);
+    const handleScroll = () => setScrolled(window.scrollY > 8);
+
+    handleScroll();
+    window.addEventListener("scroll", handleScroll, { passive: true });
+
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  // Rotate announcements
+  useEffect(() => {
+    const timer = window.setInterval(() => {
+      setAnnouncementIndex((current) => (current + 1) % announcements.length);
+    }, 4500);
+
+    return () => window.clearInterval(timer);
+  }, []);
+
+  // Close overlays on navigation
+  useEffect(() => {
+    setShopMenuOpen(false);
+    setMobileNavOpen(false);
+    setSearchOpen(false);
+  }, [location.pathname, location.search]);
+
+  // Keyboard shortcuts
+  useEffect(() => {
+    const handleKeyDown = (event) => {
+      if (event.key === "Escape") {
+        setShopMenuOpen(false);
+        setMobileNavOpen(false);
+        setSearchOpen(false);
+      }
+
+      const target = event.target;
+      const isTyping =
+        target instanceof HTMLElement &&
+        (target.isContentEditable ||
+          ["INPUT", "TEXTAREA", "SELECT"].includes(target.tagName));
+
+      if (event.key === "/" && !isTyping) {
+        event.preventDefault();
+        setSearchOpen(true);
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
+
+  const closeMenus = () => {
+    setShopMenuOpen(false);
+    setMobileNavOpen(false);
+    setSearchOpen(false);
+  };
+
+  const navLinkClass =
+    "relative inline-flex items-center whitespace-nowrap py-2 text-[10px] font-bold uppercase tracking-[0.15em] text-neutral-700 transition-colors duration-200 hover:text-black after:absolute after:bottom-0 after:left-0 after:h-px after:w-0 after:bg-black after:transition-all after:duration-300 hover:after:w-full";
+
+  const iconButtonClass =
+    "relative inline-flex h-10 w-10 items-center justify-center rounded-full text-neutral-900 transition-colors duration-200 hover:bg-neutral-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-neutral-900";
 
   return (
     <>
       <header
-        className={`sticky top-0 z-40 bg-white transition-shadow duration-200 ${
-          scrolled ? "shadow-sm" : ""
+        className={`sticky top-0 z-50 bg-[#fafaf8] text-neutral-950 transition-shadow duration-300 ${
+          scrolled ? "shadow-[0_5px_25px_rgba(0,0,0,0.07)]" : ""
         }`}
       >
-        <div className="mx-auto flex max-w-[1600px] items-center justify-between gap-4 px-4 py-4 sm:px-6 lg:px-8">
-          <div className="flex items-center gap-3">
+        {/* Announcement strip */}
+        <div className="flex h-7 items-center justify-center bg-[#20201e] px-3 text-center text-[9px] font-medium uppercase tracking-[0.16em] text-white sm:text-[10px] sm:tracking-[0.2em]">
+          <span key={announcementIndex} aria-live="polite">
+            {announcements[announcementIndex]}
+          </span>
+        </div>
+
+        {/* Main navigation */}
+        <div className="relative mx-auto flex h-[66px] max-w-[1600px] items-center justify-between gap-3 border-b border-neutral-200/70 px-3 sm:px-6 lg:h-[76px] lg:px-10">
+          {/* Mobile menu and brand */}
+          <div className="flex min-w-0 shrink-0 items-center">
             <button
-              onClick={() => setMobileNavOpen(true)}
-              aria-label="Open menu"
-              className="rounded-full p-2 hover:bg-neutral-100 lg:hidden"
+              type="button"
+              onClick={() => {
+                setMobileNavOpen(true);
+                setShopMenuOpen(false);
+              }}
+              aria-label="Open navigation menu"
+              aria-expanded={mobileNavOpen}
+              className={`${iconButtonClass} mr-1 lg:hidden`}
             >
-              <Menu size={20} />
+              <Menu size={21} strokeWidth={1.7} />
             </button>
-            <Link to="/" className="text-lg font-bold">
-              OFFDUTY
+
+            <Link
+              to="/"
+              onClick={closeMenus}
+              aria-label="OFFDUTY home"
+              className="text-[19px] font-black tracking-[0.18em] sm:text-[23px] lg:text-[25px]"
+            >
+              OFFDUTY<span className="text-neutral-400">®</span>
             </Link>
           </div>
 
-          <nav className="hidden items-center gap-1 rounded-full bg-neutral-100 p-1 lg:flex">
+          {/* Desktop links */}
+          <nav
+            aria-label="Main navigation"
+            className="hidden h-full items-center gap-5 lg:flex xl:gap-7 2xl:gap-9"
+          >
             <button
-              onClick={() => setShopMenuOpen(true)}
-              className={`rounded-full px-4 py-2 text-xs font-bold uppercase tracking-wide hover:bg-white ${
-                shopMenuOpen ? "bg-white" : ""
+              type="button"
+              onClick={() => setShopMenuOpen((open) => !open)}
+              onMouseEnter={() => setShopMenuOpen(true)}
+              aria-expanded={shopMenuOpen}
+              className={`${navLinkClass} ${
+                shopMenuOpen ? "after:!w-full text-black" : ""
               }`}
             >
               Shop
             </button>
-            <Link
-              to="/shop?gender=women"
-              className="rounded-full px-4 py-2 text-xs font-bold uppercase tracking-wide hover:bg-white"
-            >
+
+            <Link to="/shop?gender=women" className={navLinkClass}>
               Women
             </Link>
-            <Link
-              to="/shop?gender=men"
-              className="rounded-full px-4 py-2 text-xs font-bold uppercase tracking-wide hover:bg-white"
-            >
+
+            <Link to="/shop?gender=men" className={navLinkClass}>
               Men
             </Link>
-            <Link
-              to="/shop?sort=newest"
-              className="rounded-full px-4 py-2 text-xs font-bold uppercase tracking-wide hover:bg-white"
-            >
-              New Arrivals
+
+            <Link to="/shop?sort=newest" className={navLinkClass}>
+              New arrivals
             </Link>
-            <Link
-              to="/shop"
-              className="rounded-full px-4 py-2 text-xs font-bold uppercase tracking-wide hover:bg-white"
-            >
+
+            <Link to="/shop" className={navLinkClass}>
               Featured
             </Link>
           </nav>
 
-          <div className="flex items-center gap-1.5 sm:gap-2">
+          {/* Account and shopping actions */}
+          <div className="flex shrink-0 items-center gap-0 sm:gap-1">
+            <button
+              type="button"
+              onClick={() => setSearchOpen(true)}
+              aria-label="Open search"
+              className={iconButtonClass}
+            >
+              <Search size={19} strokeWidth={1.7} />
+            </button>
+
             <Link
               to="/wishlist"
-              aria-label="Wishlist"
-              className="relative rounded-full p-2.5 hover:bg-neutral-100"
+              aria-label={`Wishlist, ${wishlistCount} items`}
+              className={iconButtonClass}
             >
-              <Heart size={18} />
+              <Heart size={19} strokeWidth={1.7} />
               {wishlistCount > 0 && (
-                <span className="absolute -right-0.5 -top-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-neutral-900 text-[10px] text-white">
+                <span className="absolute right-0.5 top-0.5 flex h-[17px] min-w-[17px] items-center justify-center rounded-full bg-black px-1 text-[9px] font-bold text-white">
                   {wishlistCount}
                 </span>
               )}
             </Link>
+
             <Link
               to={user ? "/account" : "/login"}
               aria-label={user ? "My account" : "Log in"}
-              className="hidden rounded-full p-2.5 hover:bg-neutral-100 sm:block"
+              className={`${iconButtonClass} hidden sm:inline-flex`}
             >
-              <User size={18} />
+              <UserRound size={19} strokeWidth={1.7} />
             </Link>
+
             <button
-              onClick={() => setSearchOpen(true)}
-              className="flex items-center gap-2 rounded-full border border-neutral-300 px-4 py-2.5 text-xs font-bold uppercase tracking-wide hover:border-neutral-900"
-            >
-              <Search size={16} />
-              <span className="hidden sm:inline">Search</span>
-            </button>
-            <button
+              type="button"
               onClick={() => setCartOpen(true)}
-              className="flex items-center gap-2 rounded-full border border-neutral-300 px-4 py-2.5 text-xs font-bold uppercase tracking-wide hover:border-neutral-900"
+              aria-label={`Open cart, ${itemCount} items`}
+              className={iconButtonClass}
             >
-              <ShoppingBag size={16} />
-              <span className="hidden sm:inline">Cart</span> ({itemCount})
+              <ShoppingBag size={19} strokeWidth={1.7} />
+              {itemCount > 0 && (
+                <span className="absolute right-0.5 top-0.5 flex h-[17px] min-w-[17px] items-center justify-center rounded-full bg-black px-1 text-[9px] font-bold text-white">
+                  {itemCount}
+                </span>
+              )}
             </button>
           </div>
         </div>
+
+        {/* Desktop mega menu */}
+        <div
+          className="hidden lg:block"
+          onMouseEnter={() => setShopMenuOpen(true)}
+          onMouseLeave={() => setShopMenuOpen(false)}
+        >
+          {shopMenuOpen && (
+            <ShopMegaMenu
+              open={shopMenuOpen}
+              onClose={() => setShopMenuOpen(false)}
+            />
+          )}
+        </div>
       </header>
 
+      {/* Existing overlays and mobile navigation */}
       <MobileNav open={mobileNavOpen} onClose={() => setMobileNavOpen(false)} />
-      <ShopMegaMenu
-        open={shopMenuOpen}
-        onClose={() => setShopMenuOpen(false)}
-      />
+
       <SearchOverlay open={searchOpen} onClose={() => setSearchOpen(false)} />
     </>
   );
