@@ -1,192 +1,202 @@
 import { useEffect, useState } from "react";
-import { ChevronLeft, ChevronRight, ArrowUpRight } from "lucide-react";
+import { ArrowRight, ChevronLeft, ChevronRight, RefreshCw } from "lucide-react";
 import { Link } from "react-router-dom";
-
 import { getFeaturedProducts } from "../../services/productService";
 import ProductCard from "../shop/ProductCard";
 import { useCarousel } from "../../hooks/useCarousel";
 
-export default function FeaturedCarousel({ title = "Featured Products" }) {
+const SKELETONS = [1, 2, 3, 4];
+
+function ProductSkeleton() {
+  return (
+    <div className="min-w-0 animate-pulse">
+      <div className="aspect-[3/4] rounded-sm bg-neutral-100" />
+
+      <div className="space-y-3 pt-4">
+        <div className="h-3 w-3/4 rounded bg-neutral-100" />
+        <div className="h-3 w-1/2 rounded bg-neutral-100" />
+        <div className="h-4 w-1/3 rounded bg-neutral-100" />
+      </div>
+    </div>
+  );
+}
+
+export default function FeaturedCarousel() {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [retry, setRetry] = useState(0);
 
   const { trackRef, canScrollLeft, canScrollRight, scroll } = useCarousel();
+
+  const loadProducts = async () => {
+    setLoading(true);
+    setError("");
+
+    try {
+      const result = await getFeaturedProducts(10);
+      setProducts(Array.isArray(result) ? result : []);
+    } catch {
+      setError("We couldn't load the featured collection.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     let active = true;
 
-    const fetchProducts = async () => {
+    async function fetchProducts() {
+      setLoading(true);
+      setError("");
+
       try {
-        setLoading(true);
-        setError("");
-
-        const res = await getFeaturedProducts(10);
+        const result = await getFeaturedProducts(10);
 
         if (active) {
-          setProducts(Array.isArray(res) ? res : []);
+          setProducts(Array.isArray(result) ? result : []);
         }
-      } catch (err) {
+      } catch {
         if (active) {
-          setError("Unable to load featured products.");
+          setError("We couldn't load the featured collection.");
         }
       } finally {
-        if (active) setLoading(false);
+        if (active) {
+          setLoading(false);
+        }
       }
-    };
+    }
 
     fetchProducts();
 
     return () => {
       active = false;
     };
-  }, [retry]);
-
-  if (!loading && !error && products.length === 0) {
-    return null;
-  }
+  }, []);
 
   return (
-    <section className="w-full overflow-hidden bg-white py-16 sm:py-20 lg:py-24">
-      <div className="mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-10">
-        {/* SECTION HEADER */}
-
-        <div className="mb-9 flex items-end justify-between gap-4 border-b border-neutral-200 pb-6 sm:mb-12">
-          <div className="space-y-3">
-            <div className="flex items-center gap-2">
-              <span className="h-1.5 w-1.5 rounded-full bg-black" />
-
-              <span className="text-[10px] font-semibold uppercase tracking-[0.25em] text-neutral-500">
-                The OFFDUTY Edit
-              </span>
-            </div>
-
-            <h2 className="text-3xl font-black uppercase leading-none tracking-[-0.055em] text-black sm:text-4xl lg:text-5xl">
-              {title}
-              <span className="text-neutral-300">.</span>
-            </h2>
-
-            <p className="max-w-md text-xs leading-relaxed text-neutral-500 sm:text-sm">
-              Everyday essentials. Anything but ordinary.
+    <section className="overflow-hidden bg-white py-14 sm:py-16 lg:py-20">
+      <div className="mx-auto max-w-[1600px] px-4 sm:px-6 lg:px-10 xl:px-14">
+        {/* Section heading — typography matched to reference */}
+        <div className="mb-8 flex items-end justify-between gap-4 sm:mb-10 lg:mb-12">
+          <div>
+            <p className="mb-4 text-[11px] font-medium uppercase tracking-[0.28em] text-neutral-500 sm:text-sm">
+              Find Your Uniform
             </p>
+
+            <h2 className="text-[24px] font-black uppercase leading-[1.05] tracking-[-0.035em] text-black sm:text-[42px] lg:text-[46px]">
+              Featured Pieces
+            </h2>
           </div>
 
-          {/* DESKTOP NAVIGATION */}
+          {/* Desktop navigation */}
+          <div className="flex shrink-0 items-center gap-2">
+            <Link
+              to="/shop"
+              className="group mr-2 hidden items-center gap-2 border-b border-neutral-300 pb-1 text-xs font-bold uppercase tracking-wider text-neutral-950 transition-colors hover:border-black sm:inline-flex"
+            >
+              View All
+              <ArrowRight
+                size={14}
+                className="transition-transform duration-200 group-hover:translate-x-1"
+              />
+            </Link>
 
-          <div className="hidden items-center gap-2 sm:flex">
             <button
               type="button"
               onClick={() => scroll("left")}
-              disabled={loading || !canScrollLeft}
-              aria-label="Scroll products left"
-              className="group flex h-11 w-11 items-center justify-center rounded-full border border-neutral-200 transition-all duration-300 hover:border-black hover:bg-black hover:text-white disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:border-neutral-200 disabled:hover:bg-transparent disabled:hover:text-black"
+              disabled={!canScrollLeft}
+              aria-label="Scroll featured products left"
+              className="flex h-10 w-10 items-center justify-center border border-neutral-200 text-black transition-colors hover:border-black hover:bg-black hover:text-white disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:border-neutral-200 disabled:hover:bg-white disabled:hover:text-black"
             >
-              <ChevronLeft
-                size={19}
-                strokeWidth={1.5}
-                className="transition-transform group-hover:-translate-x-0.5"
-              />
+              <ChevronLeft size={19} strokeWidth={1.7} />
             </button>
 
             <button
               type="button"
               onClick={() => scroll("right")}
-              disabled={loading || !canScrollRight}
-              aria-label="Scroll products right"
-              className="group flex h-11 w-11 items-center justify-center rounded-full border border-neutral-200 transition-all duration-300 hover:border-black hover:bg-black hover:text-white disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:border-neutral-200 disabled:hover:bg-transparent disabled:hover:text-black"
+              disabled={!canScrollRight}
+              aria-label="Scroll featured products right"
+              className="flex h-10 w-10 items-center justify-center border border-neutral-200 text-black transition-colors hover:border-black hover:bg-black hover:text-white disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:border-neutral-200 disabled:hover:bg-white disabled:hover:text-black"
             >
-              <ChevronRight
-                size={19}
-                strokeWidth={1.5}
-                className="transition-transform group-hover:translate-x-0.5"
-              />
+              <ChevronRight size={19} strokeWidth={1.7} />
             </button>
           </div>
         </div>
 
-        {/* ERROR STATE */}
-
-        {error ? (
-          <div
-            role="alert"
-            className="flex min-h-48 flex-col items-center justify-center gap-4 bg-neutral-50 p-6 text-center"
-          >
-            <p className="text-sm text-neutral-500">{error}</p>
-
-            <button
-              type="button"
-              onClick={() => setRetry((prev) => prev + 1)}
-              className="border-b border-black pb-1 text-xs font-semibold uppercase tracking-widest transition-opacity hover:opacity-50"
-            >
-              Try Again
-            </button>
-          </div>
-        ) : loading ? (
-          /* SKELETON LOADING */
-
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-5 lg:grid-cols-4">
-            {Array.from({ length: 4 }).map((_, index) => (
-              <div
-                key={index}
-                className={
-                  index === 3
-                    ? "hidden lg:block"
-                    : index === 2
-                      ? "hidden sm:block"
-                      : ""
-                }
-              >
-                <div className="aspect-[3/4] animate-pulse bg-neutral-100" />
-
-                <div className="mt-4 space-y-2">
-                  <div className="h-3 w-2/3 animate-pulse rounded bg-neutral-100" />
-
-                  <div className="h-3 w-1/3 animate-pulse rounded bg-neutral-100" />
-                </div>
-              </div>
-            ))}
-          </div>
-        ) : (
-          /* PRODUCT CAROUSEL */
-
-          <div
-            ref={trackRef}
-            aria-label="Featured products"
-            tabIndex={0}
-            className="no-scrollbar flex snap-x snap-mandatory gap-3 overflow-x-auto overscroll-x-contain scroll-smooth pb-3 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black motion-reduce:scroll-auto sm:gap-5"
-          >
-            {products.map((product) => (
-              <div
-                key={product._id || product.id}
-                className="w-[calc((100%-12px)/2)] flex-none snap-start sm:w-[calc((100%-40px)/3)] lg:w-[calc((100%-60px)/4)]"
-              >
-                <ProductCard product={product} />
-              </div>
+        {/* Loading skeletons */}
+        {loading && (
+          <div className="grid grid-cols-2 gap-x-3 gap-y-8 sm:grid-cols-3 sm:gap-x-5 lg:grid-cols-4 lg:gap-x-6">
+            {SKELETONS.map((item) => (
+              <ProductSkeleton key={item} />
             ))}
           </div>
         )}
 
-        {/* BOTTOM SECTION */}
+        {/* Error state */}
+        {!loading && error && (
+          <div className="flex min-h-56 flex-col items-center justify-center border border-neutral-200 px-5 text-center">
+            <p className="text-sm text-neutral-600">{error}</p>
 
-        {!loading && !error && products.length > 0 && (
-          <div className="mt-10 flex flex-col items-center gap-5 sm:mt-12">
+            <button
+              type="button"
+              onClick={loadProducts}
+              className="mt-5 inline-flex items-center gap-2 bg-black px-5 py-3 text-xs font-bold uppercase tracking-wider text-white transition-colors hover:bg-neutral-700"
+            >
+              <RefreshCw size={14} />
+              Try Again
+            </button>
+          </div>
+        )}
+
+        {/* Empty state */}
+        {!loading && !error && products.length === 0 && (
+          <div className="py-16 text-center">
+            <p className="text-sm text-neutral-500">
+              New featured pieces are coming soon.
+            </p>
+
             <Link
               to="/shop"
-              className="group inline-flex items-center justify-center gap-8 border border-black bg-black px-7 py-4 text-xs font-semibold uppercase tracking-[0.15em] text-white transition-all duration-300 hover:bg-white hover:text-black"
+              className="mt-5 inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-black underline underline-offset-4"
             >
-              Explore Collection
-              <ArrowUpRight
-                size={17}
-                strokeWidth={1.5}
-                className="transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5"
-              />
+              Explore the Shop
+              <ArrowRight size={14} />
             </Link>
-
-            <span className="text-[10px] uppercase tracking-[0.2em] text-neutral-400 sm:hidden">
-              Swipe to explore
-            </span>
           </div>
+        )}
+
+        {/* Product carousel */}
+        {!loading && !error && products.length > 0 && (
+          <>
+            <div
+              ref={trackRef}
+              className="flex snap-x snap-mandatory gap-3 overflow-x-auto scroll-smooth pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:gap-5 lg:gap-6"
+            >
+              {products.map((product) => (
+                <div
+                  key={product.id ?? product._id ?? product.slug}
+                  className="w-[calc(50%-6px)] min-w-[calc(50%-6px)] snap-start sm:w-[calc(33.333%-14px)] sm:min-w-[calc(33.333%-14px)] lg:w-[calc(25%-18px)] lg:min-w-[calc(25%-18px)]"
+                >
+                  <ProductCard product={product} />
+                </div>
+              ))}
+            </div>
+
+            {/* Bottom row */}
+            <div className="mt-5 flex items-center justify-between gap-4 border-t border-neutral-100 pt-4 sm:mt-7">
+              <p className="text-[10px] font-medium uppercase tracking-[0.2em] text-neutral-400 sm:text-xs">
+                Made for your everyday rotation
+              </p>
+
+              <Link
+                to="/shop"
+                className="inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.15em] text-black sm:hidden"
+              >
+                View All
+                <ArrowRight size={14} />
+              </Link>
+            </div>
+          </>
         )}
       </div>
     </section>

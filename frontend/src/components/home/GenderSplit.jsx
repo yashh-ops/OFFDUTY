@@ -31,11 +31,11 @@ export default function GenderSplit() {
         {/* Section heading */}
         <div className="mb-7 flex flex-col gap-3 sm:mb-10 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <p className="mb-3 text-[10px] font-medium uppercase tracking-[0.22em] text-neutral-500">
+            <p className="mb-3 text-[11px] font-medium uppercase tracking-[0.22em] text-neutral-500">
               Find your fit
             </p>
 
-            <h2 className="text-3xl font-medium tracking-[-0.06em] text-neutral-950 sm:text-4xl lg:text-5xl">
+            <h2 className="text-[24px] font-black uppercase leading-[1.05] tracking-[-0.035em] text-black sm:text-[42px] lg:text-[46px]">
               Shop by collection<span className="text-neutral-400">.</span>
             </h2>
           </div>

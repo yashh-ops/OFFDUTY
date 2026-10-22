@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Heart, Menu, Search, ShoppingBag, UserRound, X } from "lucide-react";
+import { Heart, Menu, Search, ShoppingBag, UserRound } from "lucide-react";
 
 import { useAuth } from "../../context/AuthContext";
 import { useCart } from "../../context/CartContext";
@@ -28,17 +28,26 @@ export default function Navbar() {
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [announcementIndex, setAnnouncementIndex] = useState(0);
 
-  // Sticky header shadow
+  const shopMenuRef = useRef(null);
+
+  // Header shadow on scroll
   useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 8);
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 8);
+    };
 
     handleScroll();
-    window.addEventListener("scroll", handleScroll, { passive: true });
 
-    return () => window.removeEventListener("scroll", handleScroll);
+    window.addEventListener("scroll", handleScroll, {
+      passive: true,
+    });
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
   }, []);
 
-  // Rotate announcements
+  // Rotate announcement messages
   useEffect(() => {
     const timer = window.setInterval(() => {
       setAnnouncementIndex((current) => (current + 1) % announcements.length);
@@ -47,14 +56,31 @@ export default function Navbar() {
     return () => window.clearInterval(timer);
   }, []);
 
-  // Close overlays on navigation
+  // Close menus after navigation
   useEffect(() => {
     setShopMenuOpen(false);
     setMobileNavOpen(false);
     setSearchOpen(false);
   }, [location.pathname, location.search]);
 
-  // Keyboard shortcuts
+  // Close mega menu when clicking outside
+  useEffect(() => {
+    if (!shopMenuOpen) return;
+
+    const handleOutsideClick = (event) => {
+      if (shopMenuRef.current && !shopMenuRef.current.contains(event.target)) {
+        setShopMenuOpen(false);
+      }
+    };
+
+    document.addEventListener("pointerdown", handleOutsideClick);
+
+    return () => {
+      document.removeEventListener("pointerdown", handleOutsideClick);
+    };
+  }, [shopMenuOpen]);
+
+  // Close overlays with Escape
   useEffect(() => {
     const handleKeyDown = (event) => {
       if (event.key === "Escape") {
@@ -64,6 +90,7 @@ export default function Navbar() {
       }
 
       const target = event.target;
+
       const isTyping =
         target instanceof HTMLElement &&
         (target.isContentEditable ||
@@ -76,11 +103,20 @@ export default function Navbar() {
     };
 
     window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
   }, []);
 
   const closeMenus = () => {
     setShopMenuOpen(false);
+    setMobileNavOpen(false);
+    setSearchOpen(false);
+  };
+
+  const toggleShopMenu = () => {
+    setShopMenuOpen((previous) => !previous);
     setMobileNavOpen(false);
     setSearchOpen(false);
   };
@@ -98,16 +134,16 @@ export default function Navbar() {
           scrolled ? "shadow-[0_5px_25px_rgba(0,0,0,0.07)]" : ""
         }`}
       >
-        {/* Announcement strip */}
+        {/* Announcement bar */}
         <div className="flex h-7 items-center justify-center bg-[#20201e] px-3 text-center text-[9px] font-medium uppercase tracking-[0.16em] text-white sm:text-[10px] sm:tracking-[0.2em]">
           <span key={announcementIndex} aria-live="polite">
             {announcements[announcementIndex]}
           </span>
         </div>
 
-        {/* Main navigation */}
+        {/* Main navbar */}
         <div className="relative mx-auto flex h-[66px] max-w-[1600px] items-center justify-between gap-3 border-b border-neutral-200/70 px-3 sm:px-6 lg:h-[76px] lg:px-10">
-          {/* Mobile menu and brand */}
+          {/* Logo and mobile menu button */}
           <div className="flex min-w-0 shrink-0 items-center">
             <button
               type="button"
@@ -132,45 +168,61 @@ export default function Navbar() {
             </Link>
           </div>
 
-          {/* Desktop links */}
+          {/* Desktop navigation */}
           <nav
             aria-label="Main navigation"
             className="hidden h-full items-center gap-5 lg:flex xl:gap-7 2xl:gap-9"
           >
+            {/* SHOP: CLICK ONLY — NEVER NAVIGATES */}
             <button
               type="button"
-              onClick={() => setShopMenuOpen((open) => !open)}
-              onMouseEnter={() => setShopMenuOpen(true)}
+              onClick={toggleShopMenu}
               aria-expanded={shopMenuOpen}
+              aria-haspopup="true"
               className={`${navLinkClass} ${
-                shopMenuOpen ? "after:!w-full text-black" : ""
+                shopMenuOpen ? "text-black after:!w-full" : ""
               }`}
             >
               Shop
             </button>
 
-            <Link to="/shop?gender=women" className={navLinkClass}>
+            <Link
+              to="/shop?gender=women"
+              onClick={closeMenus}
+              className={navLinkClass}
+            >
               Women
             </Link>
 
-            <Link to="/shop?gender=men" className={navLinkClass}>
+            <Link
+              to="/shop?gender=men"
+              onClick={closeMenus}
+              className={navLinkClass}
+            >
               Men
             </Link>
 
-            <Link to="/shop?sort=newest" className={navLinkClass}>
+            <Link
+              to="/shop?sort=newest"
+              onClick={closeMenus}
+              className={navLinkClass}
+            >
               New arrivals
             </Link>
 
-            <Link to="/shop" className={navLinkClass}>
+            <Link to="/shop" onClick={closeMenus} className={navLinkClass}>
               Featured
             </Link>
           </nav>
 
-          {/* Account and shopping actions */}
+          {/* Search, wishlist, account and cart */}
           <div className="flex shrink-0 items-center gap-0 sm:gap-1">
             <button
               type="button"
-              onClick={() => setSearchOpen(true)}
+              onClick={() => {
+                setSearchOpen(true);
+                setShopMenuOpen(false);
+              }}
               aria-label="Open search"
               className={iconButtonClass}
             >
@@ -179,10 +231,12 @@ export default function Navbar() {
 
             <Link
               to="/wishlist"
+              onClick={closeMenus}
               aria-label={`Wishlist, ${wishlistCount} items`}
               className={iconButtonClass}
             >
               <Heart size={19} strokeWidth={1.7} />
+
               {wishlistCount > 0 && (
                 <span className="absolute right-0.5 top-0.5 flex h-[17px] min-w-[17px] items-center justify-center rounded-full bg-black px-1 text-[9px] font-bold text-white">
                   {wishlistCount}
@@ -192,6 +246,7 @@ export default function Navbar() {
 
             <Link
               to={user ? "/account" : "/login"}
+              onClick={closeMenus}
               aria-label={user ? "My account" : "Log in"}
               className={`${iconButtonClass} hidden sm:inline-flex`}
             >
@@ -205,6 +260,7 @@ export default function Navbar() {
               className={iconButtonClass}
             >
               <ShoppingBag size={19} strokeWidth={1.7} />
+
               {itemCount > 0 && (
                 <span className="absolute right-0.5 top-0.5 flex h-[17px] min-w-[17px] items-center justify-center rounded-full bg-black px-1 text-[9px] font-bold text-white">
                   {itemCount}
@@ -212,26 +268,26 @@ export default function Navbar() {
               )}
             </button>
           </div>
-        </div>
 
-        {/* Desktop mega menu */}
-        <div
-          className="hidden lg:block"
-          onMouseEnter={() => setShopMenuOpen(true)}
-          onMouseLeave={() => setShopMenuOpen(false)}
-        >
+          {/* Desktop mega menu — rendered only after clicking Shop */}
           {shopMenuOpen && (
-            <ShopMegaMenu
-              open={shopMenuOpen}
-              onClose={() => setShopMenuOpen(false)}
-            />
+            <div
+              ref={shopMenuRef}
+              className="absolute left-0 right-0 top-full hidden lg:block"
+            >
+              <ShopMegaMenu
+                open={shopMenuOpen}
+                onClose={() => setShopMenuOpen(false)}
+              />
+            </div>
           )}
         </div>
       </header>
 
-      {/* Existing overlays and mobile navigation */}
+      {/* Mobile navigation */}
       <MobileNav open={mobileNavOpen} onClose={() => setMobileNavOpen(false)} />
 
+      {/* Search overlay */}
       <SearchOverlay open={searchOpen} onClose={() => setSearchOpen(false)} />
     </>
   );
