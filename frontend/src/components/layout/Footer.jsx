@@ -63,13 +63,13 @@ const SOCIALS = [
   {
     icon: InstagramIcon,
     label: "Instagram",
-    href: "https://www.instagram.com/unboxstore.in/",
+    href: "https://www.instagram.com",
   },
-  { icon: TwitterIcon, label: "Twitter", href: "https://x.com/weunboxhq" },
+  { icon: TwitterIcon, label: "Twitter", href: "https://www.twitter.com" },
   {
     icon: LinkedinIcon,
     label: "LinkedIn",
-    href: "https://www.linkedin.com/company/unboxstore/",
+    href: "https://www.linkedin.com",
   },
 ];
 

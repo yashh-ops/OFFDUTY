@@ -1,20 +1,81 @@
-import {BrowserRouter,Routes,Route,Navigate,useLocation} from 'react-router-dom'
-import {AuthProvider,useAuth} from './context/AuthContext'
-import {CartProvider} from './context/CartContext'
-import {WishlistProvider} from './context/WishlistContext'
-import AnnouncementBar from './components/layout/AnnouncementBar'
-import Navbar from './components/layout/Navbar'
-import Footer from './components/layout/Footer'
-import CartDrawer from './components/layout/CartDrawer'
-import Home from './pages/Home'
-import Shop from './pages/Shop'
-import Product from './pages/Product'
-import Cart from './pages/Cart'
-import About from './pages/About'
-import Contact from './pages/Contact'
-import Auth from './pages/Auth'
-import Account from './pages/Account'
-import Wishlist from './pages/Wishlist'
-function Protected({children}){const {user,loading}=useAuth(),location=useLocation();if(loading)return <p className="p-12 text-center">Loading account…</p>;return user?children:<Navigate to="/login" state={{from:location.pathname+location.search}} replace/>}
-function App(){return <BrowserRouter><AuthProvider><CartProvider><WishlistProvider><AnnouncementBar/><Navbar/><Routes><Route path="/" element={<Home/>}/><Route path="/shop" element={<Shop/>}/><Route path="/product/:slug" element={<Product/>}/><Route path="/cart" element={<Cart/>}/><Route path="/about" element={<About/>}/><Route path="/contact" element={<Contact/>}/><Route path="/login" element={<Auth/>}/><Route path="/register" element={<Auth mode="register"/>}/><Route path="/account" element={<Protected><Account/></Protected>}/><Route path="/wishlist" element={<Protected><Wishlist/></Protected>}/><Route path="*" element={<Navigate to="/" replace/>}/></Routes><Footer/><CartDrawer/></WishlistProvider></CartProvider></AuthProvider></BrowserRouter>}
-export default App
+import {
+  BrowserRouter,
+  Routes,
+  Route,
+  Navigate,
+  useLocation,
+} from "react-router-dom";
+import { AuthProvider, useAuth } from "./context/AuthContext";
+import { CartProvider } from "./context/CartContext";
+import { WishlistProvider } from "./context/WishlistContext";
+import AnnouncementBar from "./components/layout/AnnouncementBar";
+import Navbar from "./components/layout/Navbar";
+import Footer from "./components/layout/Footer";
+import CartDrawer from "./components/layout/CartDrawer";
+import Home from "./pages/Home";
+import Shop from "./pages/Shop";
+import Product from "./pages/Product";
+import Cart from "./pages/Cart";
+import About from "./pages/About";
+import Contact from "./pages/Contact";
+import Auth from "./pages/Auth";
+import Account from "./pages/Account";
+import Wishlist from "./pages/Wishlist";
+function Protected({ children }) {
+  const { user, loading } = useAuth(),
+    location = useLocation();
+  if (loading) return <p className="p-12 text-center">Loading account…</p>;
+  return user ? (
+    children
+  ) : (
+    <Navigate
+      to="/login"
+      state={{ from: location.pathname + location.search }}
+      replace
+    />
+  );
+}
+function App() {
+  return (
+    <BrowserRouter>
+      <AuthProvider>
+        <CartProvider>
+          <WishlistProvider>
+            <AnnouncementBar />
+            <Navbar />
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/shop" element={<Shop />} />
+              <Route path="/product/:slug" element={<Product />} />
+              <Route path="/cart" element={<Cart />} />
+              <Route path="/about" element={<About />} />
+              <Route path="/contact" element={<Contact />} />
+              <Route path="/login" element={<Auth />} />
+              <Route path="/register" element={<Auth mode="register" />} />
+              <Route
+                path="/account"
+                element={
+                  <Protected>
+                    <Account />
+                  </Protected>
+                }
+              />
+              <Route
+                path="/wishlist"
+                element={
+                  <Protected>
+                    <Wishlist />
+                  </Protected>
+                }
+              />
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </Routes>
+            <Footer />
+            <CartDrawer />
+          </WishlistProvider>
+        </CartProvider>
+      </AuthProvider>
+    </BrowserRouter>
+  );
+}
+export default App;
