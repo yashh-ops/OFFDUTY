@@ -10,12 +10,6 @@ import MobileNav from "./MobileNav";
 import ShopMegaMenu from "./ShopMegaMenu";
 import SearchOverlay from "./SearchOverlay";
 
-const announcements = [
-  "FREE SHIPPING ON ORDERS ABOVE ₹1,499",
-  "DROP 001 — EXPLORE THE COLLECTION",
-  "NEW SEASON. SAME ATTITUDE.",
-];
-
 export default function Navbar() {
   const { user } = useAuth();
   const { itemCount, setCartOpen } = useCart();
@@ -26,7 +20,6 @@ export default function Navbar() {
   const [shopMenuOpen, setShopMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
-  const [announcementIndex, setAnnouncementIndex] = useState(0);
 
   const shopMenuRef = useRef(null);
 
@@ -45,15 +38,6 @@ export default function Navbar() {
     return () => {
       window.removeEventListener("scroll", handleScroll);
     };
-  }, []);
-
-  // Rotate announcement messages
-  useEffect(() => {
-    const timer = window.setInterval(() => {
-      setAnnouncementIndex((current) => (current + 1) % announcements.length);
-    }, 4500);
-
-    return () => window.clearInterval(timer);
   }, []);
 
   // Close menus after navigation
@@ -80,7 +64,7 @@ export default function Navbar() {
     };
   }, [shopMenuOpen]);
 
-  // Close overlays with Escape
+  // Close overlays with Escape and support "/" search shortcut
   useEffect(() => {
     const handleKeyDown = (event) => {
       if (event.key === "Escape") {
@@ -134,13 +118,6 @@ export default function Navbar() {
           scrolled ? "shadow-[0_5px_25px_rgba(0,0,0,0.07)]" : ""
         }`}
       >
-        {/* Announcement bar */}
-        <div className="flex h-7 items-center justify-center bg-[#20201e] px-3 text-center text-[9px] font-medium uppercase tracking-[0.16em] text-white sm:text-[10px] sm:tracking-[0.2em]">
-          <span key={announcementIndex} aria-live="polite">
-            {announcements[announcementIndex]}
-          </span>
-        </div>
-
         {/* Main navbar */}
         <div className="relative mx-auto flex h-[66px] max-w-[1600px] items-center justify-between gap-3 border-b border-neutral-200/70 px-3 sm:px-6 lg:h-[76px] lg:px-10">
           {/* Logo and mobile menu button */}
@@ -173,7 +150,6 @@ export default function Navbar() {
             aria-label="Main navigation"
             className="hidden h-full items-center gap-5 lg:flex xl:gap-7 2xl:gap-9"
           >
-            {/* SHOP: CLICK ONLY — NEVER NAVIGATES */}
             <button
               type="button"
               onClick={toggleShopMenu}
@@ -269,7 +245,7 @@ export default function Navbar() {
             </button>
           </div>
 
-          {/* Desktop mega menu — rendered only after clicking Shop */}
+          {/* Desktop mega menu */}
           {shopMenuOpen && (
             <div
               ref={shopMenuRef}
